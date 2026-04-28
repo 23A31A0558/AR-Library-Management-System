@@ -1,0 +1,138 @@
+import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+// Sample book data
+const books = [
+  { id: "1", title: "Introduction to Algorithms", category: "Programming", coverUrl: "/covers/algorithms.jpg" },
+  { id: "2", title: "Database Systems", category: "Database", coverUrl: "/covers/database.jpg" },
+  { id: "3", title: "Operating System Concepts", category: "OS", coverUrl: "/covers/os.jpg" },
+  { id: "4", title: "Computer Networking", category: "CN", coverUrl: "/covers/cn.jpg" },
+  { id: "5", title: "Problem Solving with C++", category: "Problem Solving", coverUrl: "/covers/problemsolving.jpg" },
+  { id: "6", title: "Ethics and Human Values", category: "Ethics & Values", coverUrl: "/covers/ethics.jpg" },
+];
+
+const categories = ["Programming", "Problem Solving", "Database", "OS", "CN", "Ethics & Values"];
+
+function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (email && password) {
+      navigate("/categories");
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded-2xl shadow-lg w-80">
+        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-3 p-2 border rounded-lg"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-3 p-2 border rounded-lg"
+          required
+        />
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+          Login
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function Categories() {
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">📚 Categories</h1>
+      <div className="grid grid-cols-2 gap-4">
+        {categories.map((cat) => (
+          <Link
+            key={cat}
+            to={`/category/${cat}`}
+            className="p-6 bg-white rounded-xl shadow hover:shadow-lg text-center font-semibold"
+          >
+            {cat}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BookList() {
+  const { category } = useParams();
+  const [search, setSearch] = useState("");
+
+  const filteredBooks = books.filter(
+    (book) => book.category === category && book.title.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">📖 {category} Books</h1>
+      <input
+        type="text"
+        placeholder="Search book..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full mb-4 p-2 border rounded-lg"
+      />
+      <div className="grid gap-4">
+        {filteredBooks.map((book) => (
+          <Link
+            key={book.id}
+            to={`/book/${book.id}`}
+            className="p-4 bg-white rounded-xl shadow hover:shadow-lg"
+          >
+            {book.title}
+          </Link>
+        ))}
+        {filteredBooks.length === 0 && <p className="text-gray-500">No books found.</p>}
+      </div>
+    </div>
+  );
+}
+
+function BookDetails() {
+  const { id } = useParams();
+  const book = books.find((b) => b.id === id);
+
+  if (!book) return <p className="p-6 text-red-500">❌ Book not found</p>;
+
+  return (
+    <div className="p-6 flex flex-col items-center">
+      <h1 className="text-2xl font-bold mb-4">{book.title}</h1>
+      <img
+        src={book.coverUrl}
+        alt={book.title}
+        className="w-64 h-80 object-cover rounded-xl shadow"
+      />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/category/:category" element={<BookList />} />
+        <Route path="/book/:id" element={<BookDetails />} />
+      </Routes>
+    </Router>
+  );
+}
